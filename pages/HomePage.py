@@ -4,13 +4,13 @@ from utilities.BasePage import BasePage
 class HomePage(BasePage):
     def __init__(self, driver):
         super().__init__(driver)
-        self.url = "https://useinsider.com/"  # Убедитесь, что URL корректен
+        self.url = "https://useinsider.com/"
 
     def open(self):
-        """Открытие домашней страницы Insider"""
-        print(f"Opening URL: {self.url}")  # Отладочная печать URL
+        #open homepage
+        print(f"Opening URL: {self.url}")
         self.driver.get(self.url)
 
     def is_home_page_opened(self):
-        """Проверка открытия главной страницы"""
+        #check home page is opened
         return "Insider" in self.driver.title

@@ -3,6 +3,12 @@ from pages.JobPage import JobsPage
 from utilities.utils import Utils
 
 
+def log_and_take_screenshot(driver, message, filename):
+    #hrlper function to log a message and take a screenshot
+    print(message)
+    Utils.take_screenshot_on_failure(driver, filename)
+
+
 @pytest.fixture(params=["chrome"])
 def setup(request):
     driver = Utils.get_driver(browser_type=request.param)
@@ -11,25 +17,31 @@ def setup(request):
     driver.quit()
 
 
-def test_2_qa_jobs_filtering_and_redirection(setup):
+def test_qa_jobs_filtering_and_redirection(setup):
     driver = setup
     jobs_page = JobsPage(driver)
 
     try:
-        #go to website
+        # Open QA jobs page and check URL
         jobs_page.go_to_quality_assurance_jobs()
-        jobs_page.click_see_all_qa_jobs()  # Клик по кнопке "See all QA jobs"
+        assert "quality-assurance" in driver.current_url, "Failed to load Quality Assurance Jobs page"
 
-        # apply filter
+        # Log current URL
+        print("Navigated to URL:", driver.current_url)
+
+        # Apply filters
+        jobs_page.click_see_all_qa_jobs()
         jobs_page.apply_filters("Istanbul, Turkey", "Quality Assurance")
-        assert jobs_page.verify_jobs("Istanbul, Turkey",
-                                     "Quality Assurance"), "Jobs with the specified filters not found"
 
-        # check viewrole redirection
-        assert jobs_page.click_view_role(), "Redirection to Lever application page failed"
+        #Verify filtered jobs are displayed
+        assert jobs_page.verify_jobs("Istanbul, Turkey", "Quality Assurance"), "Filtered jobs not found"
+
+        #Redirection check for job details page
+        assert jobs_page.click_view_role(), "Redirection to job application page failed"
+
+        # Additional check for the application page URL
+        assert "lever" in driver.current_url, "Application page URL does not contain 'lever'"
 
     except Exception as e:
-        # take screenshot
-        Utils.take_screenshot_on_failure(driver, "test_2_qa_jobs_filtering_and_redirection_failure.png")
-        print(f"Exception occurred: {e}")
-        raise  #one more execption for reprot
+        log_and_take_screenshot(driver, f"Exception occurred: {e}", "qa_jobs_filtering_redirection_failure.png")
+        raise
